@@ -12,7 +12,7 @@ func NewKeyGenerator() *KeyGenerator {
 	return &KeyGenerator{}
 }
 
-func (c KeyGenerator) Generate() string {
+func (c KeyGenerator) GenerateKey() string {
 	key := make([]byte, 4)
 	rand.Read(key)
 	return fmt.Sprintf("%x", key)

@@ -11,7 +11,7 @@ type urlCutterService struct {
 }
 
 func (u *urlCutterService) MakeKey(url string) (string, error) {
-	key := u.keyGenerator.Generate()
+	key := GetUniqueKey(u)
 	err := u.repo.Save(url, key)
 	if err != nil {
 		log.Print("URL was not saved", err)
@@ -31,4 +31,16 @@ func (u *urlCutterService) GetURL(key string) (string, error) {
 
 func NewURLCutterService(keyGenerator localservices.KeyGenerator, repo UrlSaver) *urlCutterService {
 	return &urlCutterService{keyGenerator: keyGenerator, repo: repo}
+}
+
+func GetUniqueKey(u *urlCutterService) string {
+	keys := u.repo.GetKeys()
+	key := u.keyGenerator.GenerateKey()
+	for _, dbKey := range keys {
+		if key == dbKey {
+			key = u.keyGenerator.GenerateKey()
+			//todo :logic
+		}
+	}
+	return key
 }

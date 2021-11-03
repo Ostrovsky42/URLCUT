@@ -8,4 +8,5 @@ type KeyGenerator interface {
 type UrlSaver interface {
 	Save(string, string) error
 	Get(string) (string, error)
+	GetKeys() []string
 }

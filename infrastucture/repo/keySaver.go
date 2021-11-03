@@ -35,6 +35,26 @@ func (k keysaver) Get(key string) (string, error) {
 	return "", err
 }
 
+func (k keysaver) GetKeys() []string {
+	query := `SELECT "Key" FROM "CutUrl"`
+	var keys []string
+	rows, err := k.repo.Query(query)
+	if err != nil {
+		log.Print("Query error", err)
+	}
+	if rows == nil {
+		log.Print("Rows nil")
+	} else {
+		defer rows.Close()
+		for rows.Next() {
+			var key string
+			err = rows.Scan(&key)
+			keys = append(keys, key)
+		}
+	}
+	return keys
+}
+
 func NewKeySaver(repo *sql.DB) *keysaver {
 	return &keysaver{repo: repo}
 }
