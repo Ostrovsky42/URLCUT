@@ -4,7 +4,7 @@ import (
 	"URLCUT/app"
 	"URLCUT/infrastucture/httphandler"
 	"URLCUT/infrastucture/localservices"
-	 "URLCUT/infrastucture/repo"
+	"URLCUT/infrastucture/repo"
 	"database/sql"
 	"fmt"
 	"github.com/labstack/echo/v4"
@@ -17,20 +17,20 @@ const (
 	password = "********"
 	dbname   = "ShortUrl"
 )
+
 func main() {
 	e := echo.New()
 	db := ConnectDB()
 	defer db.Close()
 
-	repository:=repo.NewKeySaver(db)
-	keyGeneratorService:=localservices.NewKeyGenerator()
-	service:=app.NewURLCutterService(*keyGeneratorService, repository)
-	handler:=httphandler.NewUrlGenerator(service)
+	repository := repo.NewKeySaver(db)
+	keyGeneratorService := localservices.NewKeyGenerator()
+	service := app.NewURLCutterService(*keyGeneratorService, repository)
+	handler := httphandler.NewUrlGenerator(service)
 	e.POST("/urlcut", handler.UrlCutter)
 	e.GET("/:key", handler.GetUrl)
 	e.Logger.Fatal(e.Start(":8088"))
 }
-
 
 func ConnectDB() (db *sql.DB) {
 	// connection string
