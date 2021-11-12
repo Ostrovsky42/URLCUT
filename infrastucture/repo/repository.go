@@ -23,36 +23,21 @@ func (k keysaver) Save(url string, key string) error {
 func (k keysaver) Get(key string) (string, error) {
 	query := `SELECT "LongURL" FROM "CutUrl" where "Key"=$1`
 	row, err := k.repo.Query(query, key)
+	defer row.Close()
 	if err != nil {
 		log.Print("Query error", err)
+		return "", err
 	}
 	var longUrl string
-	row.Next()
-	err = row.Scan(&longUrl)
-	if err != nil {
-		log.Print("Scan row error", err)
-	}
-	return "", err
-}
 
-func (k keysaver) GetKeys() []string {
-	query := `SELECT "Key" FROM "CutUrl"`
-	var keys []string
-	rows, err := k.repo.Query(query)
-	if err != nil {
-		log.Print("Query error", err)
-	}
-	if rows == nil {
-		log.Print("Rows nil")
-	} else {
-		defer rows.Close()
-		for rows.Next() {
-			var key string
-			err = rows.Scan(&key)
-			keys = append(keys, key)
+	for row.Next() {
+		err = row.Scan(&longUrl)
+		if err != nil {
+			log.Print("Scan row error", err)
+			return "", err
 		}
 	}
-	return keys
+	return longUrl, nil
 }
 
 func NewKeySaver(repo *sql.DB) *keysaver {

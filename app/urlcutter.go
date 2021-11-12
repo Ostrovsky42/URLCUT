@@ -5,22 +5,22 @@ import (
 	"github.com/labstack/gommon/log"
 )
 
-type urlCutterService struct {
-	keyGenerator localservices.KeyGenerator
+type UrlCutterService struct {
+	keyGenerator localservices.GenerateInterface
 	repo         UrlSaver
 }
 
-func (u *urlCutterService) MakeKey(url string) (string, error) {
-	key := GetUniqueKey(u)
+func (u *UrlCutterService) MakeKey(url string) (string, error) {
+	key := u.GetUniqueKey()
 	err := u.repo.Save(url, key)
 	if err != nil {
 		log.Print("URL was not saved", err)
 		return "", err
 	}
-	return key, err
+	return key, nil
 }
 
-func (u *urlCutterService) GetURL(key string) (string, error) {
+func (u *UrlCutterService) GetURL(key string) (string, error) {
 	longUrl, err := u.repo.Get(key)
 	if err != nil {
 		log.Print("no such url", err)
@@ -29,17 +29,17 @@ func (u *urlCutterService) GetURL(key string) (string, error) {
 	return longUrl, nil
 }
 
-func NewURLCutterService(keyGenerator localservices.KeyGenerator, repo UrlSaver) *urlCutterService {
-	return &urlCutterService{keyGenerator: keyGenerator, repo: repo}
+func NewURLCutterService(keyGenerator localservices.GenerateInterface, repo UrlSaver) *UrlCutterService {
+	return &UrlCutterService{keyGenerator: keyGenerator, repo: repo}
 }
 
-func GetUniqueKey(u *urlCutterService) string {
-	keys := u.repo.GetKeys()
-	key := u.keyGenerator.GenerateKey()
-	for _, dbKey := range keys {
-		if key == dbKey {
-			key = u.keyGenerator.GenerateKey()
-			//todo :logic
+func (u *UrlCutterService) GetUniqueKey() string {
+	var key string
+	for {
+		key = u.keyGenerator.GenerateKey()
+		_, err := u.repo.Get(key)
+		if err == nil {
+			break
 		}
 	}
 	return key
